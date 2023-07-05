@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Apology
+{% endblock %}
+
+{% block body %}
+    <!-- https://memegen.link/ -->
+    <div class="container-fluid justify-content-center mt-5 pt-5">
+        <!-- <img alt="{{ top }}" class="border img-fluid" src="http://memegen.link/custom/{{ top | urlencode }}/{{ bottom | urlencode }}.jpg?alt=https://i.imgur.com/CsCgN7Ll.png&width=400" title="{{ top }}"> -->
+        <div class="d-flex justify-content-center text-center pt-2">
+            <p class="display-3 fw-bold text-danger"> Error {{ top }} </p>
+        </div>
+        <div class="d-flex justify-content-center" style="margin-top:-50px;">
+            <lottie-player src="./static/lottie/error.json" background="transparent"  speed="1" style="width: 400px;" loop autoplay></lottie-player>
+        </div>
+        <div class="d-flex justify-content-center text-center">
+            <p class="fs-5 fw-bold"> {{ bottom }} </p>
+        </div>
+    </div>
+{% endblock %}

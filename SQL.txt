@@ -1,0 +1,15 @@
+CREATE TABLE notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user_id INTEGER NOT NULL,
+    note_title TEXT NOT NULL,
+    note_content TEXT NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    hash TEXT NOT NULL,
+    security_question TEXT NOT NULL,
+    security_answer TEXT NOT NULL
+);

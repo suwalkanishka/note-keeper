@@ -1,0 +1,114 @@
+body {
+    background: #FFF;
+}
+
+h1 {
+    font-weight: bold;
+}
+h2 {
+    font-weight: bold;
+}
+h3 {
+    font-weight: bold;
+}
+h4 {
+    font-weight: bold;
+}
+h5 {
+    font-weight: bold;
+}
+h6 {
+    font-weight: bold;
+}
+
+.editor-preview {
+    padding-top: 30px !important;
+    padding-left: 15px !important;
+    background-color: #FAFAFA !important;
+}
+
+@media (min-width: 768px){
+    #main-content {
+        position: absolute;
+        top: 0px;
+        bottom: 0;
+        left: 20%;
+        width: 80%;
+        overflow-y: scroll;
+    }
+
+    #nav {
+        /* background: #222; */
+        position: absolute;
+        top: 0px;
+        bottom: 0;
+        left: 0;
+        width: 20%;
+        overflow-y: scroll;
+    }
+}
+
+
+.content {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.container-fluid {
+    margin: 0;
+    overflow: hidden;
+    height: 100%;
+}
+
+.titles-button {
+    width: 100%;
+}
+
+.new-note-button {
+    width: 100%;
+    color: #404040;
+}
+
+.btn.active {
+    background-color: #888895;
+    border-color: #DDD;
+    /* border-width: medium */
+}
+
+.btn-secondary {
+    background-color: #444450;
+    border-color: #444450;
+}
+
+
+hr {
+    border: 2px white;
+}
+
+a {
+    text-decoration: none;
+}
+
+textarea {
+    white-space: pre-wrap;
+}
+
+.CodeMirror-line {
+    overflow-wrap: break-word !important;
+    word-break: break-all !important;
+}
+
+.CodeMirror-lines {
+    overflow-wrap: break-word !important;
+    word-break: break-all;
+}
+
+.CodeMirror-wrap pre {
+    overflow-wrap: break-word !important;
+    word-break: break-all !important;
+}
+
+pre {
+    overflow-wrap: break-word !important;
+    word-break: break-all !important;
+}

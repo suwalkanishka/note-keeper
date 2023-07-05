@@ -1,0 +1,338 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+  Note Keeper
+{% endblock%}
+
+{% block styles %}
+
+<!-- Include stylesheet -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+
+{% endblock %}
+
+
+{% block body %}
+<div class="container-fluid d-flex">
+    <div class="row">
+        <div class="d-flex justify-content-end p-3">
+            <button aria-controls="nav" aria-expanded="false" class="btn btn-outline-secondary btn-sm collapsed d-md-none" data-bs-target="nav" data-bs-toggle="collapse">
+                Menu
+            </button>
+        </div>
+        <nav class="collapse d-md-block bg-dark pb-5" id="nav">
+            <div id="side_nav">
+                <div class="header-box mx-4 mt-5 mb-5">
+                    <h1 class="fs-1 fw-bold text-white">Note Keeper</h1>
+                    <p class="fs-6 text-white">
+                        Logged in as <strong>{{ username }}</strong>
+                    </p>
+                    <p class="text-white">
+                        <a href="/logout" class="btn btn-outline-light btn-sm">
+                            Logout
+                        </a>
+                    </p>
+                </div>
+
+
+                <ul class="list-unstyled mx-4 text-white titles-list">
+                    <li class="nav-item">
+                        <button type="button" class="btn btn-light my-3 fs-6 text-truncate text-start new-note-button ps-3 d-flex align-middle" id="new_note">
+                            <!-- <strong>+ New Note</strong> -->
+                            <strong>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-square" viewBox="0 0 16 16">
+                                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                                  </svg>
+                                  &nbspNew Note</strong>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="content p-5 col" id="main-content">
+            <div>
+                <h1 class="display-3 fw-bold px-md-5 pt-md-5 pb-md-2" id="{{note_titles[0]}}">
+                    {{note_titles[0]}}
+                </h1>
+                <button class="btn btn-outline-primary btn-sm ms-md-5 text-center" id="note-save">
+                        Save
+                </button>
+                <button type="button" class="btn btn-outline-dark btn-sm ms-md-2" id="note-edit" onclick="note_edit_func()">
+                    Edit Title
+                </button>
+                <button class="btn btn-outline-danger btn-sm ms-md-2" id="note-delete" onclick="note_delete_func()">
+                    Delete
+                </button>
+            </div>
+            <div class="m-md-5 my-3" id="editor">
+                <textarea id="markdown_content">
+                </textarea>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+    // CREATE AND INITIALIZE TEXT EDITOR
+
+    var simplemde = new SimpleMDE({
+        spellChecker: false,
+        hideIcons: ['side-by-side', 'fullscreen'],
+        showIcons: ['code', 'table'],
+        promptURLs: true
+    });
+    $.ajax({
+        url: '/',
+        async: false,
+        type: 'POST',
+        data: {
+            'type': 'switch',
+            'cur_note_title': '',
+            'cur_note_content_updated': '',
+            'next_note_title': $('h1.display-3')[0].id
+        },
+        success: function (response) {
+            simplemde.value(response["next_note_content"].replaceAll("•", "").replaceAll(/[\u200b]/g, ""));
+        },
+        error : function (response) {
+            console.log(response)
+        }
+    });
+
+    // SAVE NOTE
+    $("#note-save").click(function (e) {
+            // alert("button clicked." + $(".CodeMirror-scroll")[0].innerText);
+            $.ajax({
+                url: '/',
+                async: false,
+                type: 'POST',
+                data: {
+                    'type': 'save',
+                    'note_title': $('h1.display-3')[0].id,
+                    'note_content_updated': $(".CodeMirror-scroll")[0].innerText
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+            e.preventDefault();
+        });
+
+    // SWITCH BETWEEN NOTES
+    // note_titles = {{ note_titles|tojson }};
+    function removeSidebarButtons () {
+        // something
+        var listElements = document.querySelectorAll("li.li-titles-button");
+        for (var i = 0; (li = listElements[i]); i++) {
+            li.parentNode.removeChild(li);
+        }
+    }
+
+    function placeSidebarButtons (note_titles, active_title) {
+        // do something with note_titles
+        for (let i = 0; i < note_titles.length; i++) {
+            let el = document.createElement('li');
+            if (active_title == note_titles[i]) {
+                el.innerHTML = "<button type='button' class='btn btn-secondary my-2 titles-button text-truncate text-start active ps-3' id='" + note_titles[i] + "'> " + note_titles[i] + " </button>";
+            } else {
+                el.innerHTML = "<button type='button' class='btn btn-secondary my-2 titles-button text-truncate text-start ps-3' id='" + note_titles[i] + "'> " + note_titles[i] + " </button>";
+            }
+            el.classList.add("nav-item");
+            el.classList.add("li-titles-button");
+            el.addEventListener("click", function (e) {
+                // alert("clicked " + $("button[id='" + note_titles[i] + "']"));
+                $.ajax({
+                    url: '/',
+                    async: false,
+                    type: 'POST',
+                    data: {
+                        'type': 'switch',
+                        'cur_note_title': $('h1.display-3')[0].id,
+                        'cur_note_content_updated': $(".CodeMirror-scroll")[0].innerText,
+                        'next_note_title': note_titles[i]
+                    },
+                    success: function (response) {
+                        // Untoggle preview
+                        if ($('a.fa.fa-eye')[0].classList.value.includes(['active'])) {
+                            $('a.fa.fa-eye').click()
+                        }
+                        // response = JSON.parse(response);
+                        console.log("next title: " + response["next_note_title"]);
+                        simplemde.value(response["next_note_content"].replaceAll("•", "").replaceAll(/[\u200b]/g, ""));
+                        // simplemde.value(response["next_note_content"].replaceAll("•", ""));
+                        // simplemde.value(response["next_note_content"]);
+                        $('h1.display-3')[0].innerHTML = response["next_note_title"];
+                        $('h1.display-3')[0].id = response["next_note_title"];
+                        // update active class
+                        for (let i = 0; i < note_titles.length; i++) {
+                            if ($('button.titles-button')[i].innerText == response["next_note_title"]){
+                                $('button.titles-button')[i].classList.add('active');
+                            } else {
+                                $('button.titles-button')[i].classList.remove('active');
+                            }
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+
+            });
+            $('ul.titles-list')[0].appendChild(el);
+        };
+    }
+
+    // Setup buttons for switching
+    function setupSidebarButtons () {
+        $.ajax({
+            url: '/',
+            async: false,
+            type: 'POST',
+            data: {
+                'type': 'setup_buttons'
+            },
+            success: function (response) {
+                note_titles = response['note_titles'];
+                active_title = $("h1.display-3")[0].innerText;
+                removeSidebarButtons();
+                placeSidebarButtons(note_titles, active_title);
+                // activateSidebarButton(active_title);
+            },
+            error : function (response) {
+                console.log(response)
+            }
+        });
+    };
+
+    // Run once at startup
+    setupSidebarButtons();
+
+    // ADD NEW NOTE
+    $("button#new_note").click(function (e) {
+        console.log("clicked "+ $("button#new_note")[0].innerText);
+        let next_note_title_base = "Untitled ";
+        let index = 1;
+        while (note_titles.includes(next_note_title_base + index.toString())) {
+            index++;
+        }
+        let next_note_title = next_note_title_base + index.toString();
+        console.log("New note name: "+ next_note_title);
+        $.ajax({
+            url: '/',
+            async: false,
+            type: 'POST',
+            data: {
+                'type': 'new_note',
+                'next_note_title': next_note_title,
+                'cur_note_title': $('h1.display-3')[0].id,
+                'cur_note_content_updated': $(".CodeMirror-scroll")[0].innerText
+            },
+            success: function (response) {
+                // response = JSON.parse(response);
+                console.log("new title: " + response["next_note_title"]);
+                note_titles.push(response["next_note_title"]);
+                simplemde.value("");
+                $('h1.display-3')[0].innerHTML = response["next_note_title"];
+                $('h1.display-3')[0].id = response["next_note_title"];
+                setupSidebarButtons();
+            },
+            error: function (response) {
+                console.log(response);
+            }
+        });
+        e.preventDefault();
+    })
+
+    // EDIT NOTE TITLE
+    function note_edit_func() {
+        // Save content
+        $("#note-save").click();
+        // Prompt for new title
+        let message;
+        cur_note_title = $('h1.display-3')[0].innerText;
+        note_titles = $('button.titles-button')
+        let next_note_title = prompt("Please enter new title. Make sure it is alphanumeric (only spacebar and hyphens allowed) and unique.", $('h1.display-3')[0].id);
+        if (next_note_title == null || next_note_title == "") {
+            message = "Cancelled";
+            next_note_title = cur_note_title;
+        }
+        message = "New title: " + next_note_title;
+        console.log(message);
+
+
+        // Send data to Flask and validate on back end
+        $.ajax({
+            url: '/',
+            async: false,
+            type: 'POST',
+            data: {
+                'type': 'edit_title',
+                'cur_note_title': cur_note_title,
+                'next_note_title': next_note_title
+            },
+            success: function (response) {
+                console.log("next title inside edit: " + response["next_note_title"]);
+                $('h1.display-3')[0].innerHTML = response["next_note_title"];
+                $('h1.display-3')[0].id = response["next_note_title"];
+                setupSidebarButtons();
+            },
+            error: function (response) {
+                console.log(response);
+                alert("Error editing title. Ensure only alphanumeric and unique titles")
+            }
+        });
+    }
+
+
+    // DELETE NOTE
+    function note_delete_func() {
+        if ($('li.li-titles-button').length == 1) {
+            alert("Sorry, cannot delete final note. Please rename instead!")
+        } else {
+            let confirmation = confirm("Are you sure you want to delete?")
+            if (confirmation) {
+                let cur_note_title = $('h1.display-3')[0].innerText;
+                let next_note_title = $('li.li-titles-button')[0].innerText;
+                let next_note_title_index = 0
+                if (next_note_title == cur_note_title) {
+                    next_note_title = $('li.li-titles-button')[1].innerText;
+                    next_note_title_index = 1
+                }
+                $("button.titles-button")[next_note_title_index].click();
+                console.log("current note:  " + cur_note_title);
+                console.log("switched note to: " + next_note_title);
+                $.ajax({
+                    url: '/',
+                    async: false,
+                    type: 'POST',
+                    data: {
+                        'type': '"delete_note"',
+                        'cur_note_title': cur_note_title
+                    },
+                    success: function (response) {
+                        console.log(response["message"]);
+                        setupSidebarButtons();
+                    },
+                    error: function (response) {
+                        console.log(response);
+                    }
+                });
+            }
+        }
+    }
+
+
+</script>
+
+{% endblock %}
